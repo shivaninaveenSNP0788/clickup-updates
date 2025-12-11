@@ -1,0 +1,28 @@
+name: Run ClickUp Script
+
+on:
+  workflow_dispatch:        # Allows manual run
+  # schedule:
+  #   - cron: "0 3 * * *"   # (Optional) Runs every day at 3 AM UTC
+
+jobs:
+  run-script:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v3
+
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: "3.9"
+
+      - name: Install dependencies
+        run: |
+          pip install requests
+
+      - name: Run main.py
+        env:
+          API_TOKEN: ${{ secrets.API_TOKEN }}
+        run: python main.py
