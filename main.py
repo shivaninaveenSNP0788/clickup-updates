@@ -56,13 +56,39 @@ def run():
         created = datetime.fromtimestamp(int(task["date_created"]) / 1000)
 
         platform = "custom"
-        for f in task["custom_fields"]:
-            if f["id"] == FIELD_COMMERCE_PLATFORM and f.get("value"):
-                name = f["value"].lower()
-                if "shopify" in name:
-                    platform = "shopify"
-                elif any(p in name for p in ["woo", "magento", "sfcc", "big"]):
-                    platform = "rich"
+
+        for f in task.get("custom_fields", []):
+            if f["id"] == FIELD_COMMERCE_PLATFORM:
+                raw_value = f.get("value")
+        
+                option_id = None
+        
+                if isinstance(raw_value, int):
+                    # index-based dropdown
+                    try:
+                        option_id = PLATFORM_ID_BY_INDEX[raw_value]
+                    except IndexError:
+                        option_id = None
+        
+                elif isinstance(raw_value, str):
+                    # UUID-based dropdown
+                    option_id = raw_value
+        
+                elif isinstance(raw_value, list) and raw_value:
+                    # multi-select dropdown
+                    option_id = raw_value[0]
+        
+                if option_id:
+                    platform_name = PLATFORM_UUID_TO_NAME.get(option_id, "").lower()
+        
+                    if "shopify" in platform_name:
+                        platform = "shopify"
+                    elif any(p in platform_name for p in ["woo", "magento", "sfcc", "big"]):
+                        platform = "rich"
+                    else:
+                        platform = "custom"
+        
+                break
 
         current_date = created
 
