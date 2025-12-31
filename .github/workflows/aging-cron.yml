@@ -1,4 +1,4 @@
-name: ClickUp Aging Update
+name: Daily Aging Update
 
 on:
   schedule:
