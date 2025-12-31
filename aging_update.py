@@ -1,8 +1,8 @@
 import json
 import requests
 from datetime import datetime, timedelta
-from pathlib import Path
 import sys
+import urllib.parse
 
 
 # ======================================================
@@ -56,12 +56,16 @@ class WorkingDaysCalculator:
 class ClickUpIntegration:
     BASE_URL = "https://api.clickup.com/api/v2"
 
-    def __init__(self, api_token):
+    def __init__(self, api_token, required_tag):
         self.headers = {
             "Authorization": api_token,
             "Content-Type": "application/json"
         }
         self.calculator = WorkingDaysCalculator()
+
+        # Decode %23new → #new → new
+        decoded = urllib.parse.unquote(required_tag)
+        self.required_tag = decoded.lstrip("#").lower()
 
     def get_tasks(self, list_id):
         url = f"{self.BASE_URL}/list/{list_id}/task"
@@ -96,12 +100,21 @@ class ClickUpIntegration:
                 return value
         return None
 
+    def has_required_tag(self, task):
+        return any(
+            tag.get("name", "").lower() == self.required_tag
+            for tag in task.get("tags", [])
+        )
+
     def calculate_and_update_aging(self, list_id, kickoff_field_id, aging_field_id):
         tasks = self.get_tasks(list_id)
 
         updated, skipped = 0, 0
 
         for task in tasks:
+            if not self.has_required_tag(task):
+                continue
+
             task_id = task.get("id")
             name = task.get("name")
 
@@ -158,7 +171,8 @@ def main():
     config = load_clickup_config()
 
     clickup = ClickUpIntegration(
-        api_token=config["api_token"]
+        api_token=config["api_token"],
+        required_tag=config["required_tag"]
     )
 
     clickup.calculate_and_update_aging(
