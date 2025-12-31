@@ -41,7 +41,6 @@ PLATFORM_TO_BASELINE = {
 
 PLATFORM_UUID_TO_NAME = {}
 PLATFORM_ID_BY_INDEX = []
-
 BASELINE_VALUE_TO_UUID = {}
 
 # ============================
@@ -49,18 +48,13 @@ BASELINE_VALUE_TO_UUID = {}
 # ============================
 
 def fetch_dropdowns():
-    """
-    Fetch dropdown options for:
-    - Commerce Platform
-    - Baseline
-    """
     url = f"https://api.clickup.com/api/v2/list/{LIST_ID}/field"
     r = requests.get(url, headers=HEADERS)
     r.raise_for_status()
 
     fields = r.json().get("fields", [])
 
-    # Commerce Platform
+    # Commerce Platform dropdown
     platform_field = next(f for f in fields if f["id"] == FIELD_COMMERCE_PLATFORM)
     platform_opts = platform_field["type_config"]["options"]
 
@@ -68,7 +62,7 @@ def fetch_dropdowns():
     PLATFORM_UUID_TO_NAME = {o["id"]: o["name"].lower() for o in platform_opts}
     PLATFORM_ID_BY_INDEX = [o["id"] for o in sorted(platform_opts, key=lambda x: x["orderindex"])]
 
-    # Baseline
+    # Baseline dropdown
     baseline_field = next(f for f in fields if f["id"] == FIELD_BASELINE)
     baseline_opts = baseline_field["type_config"]["options"]
 
@@ -120,6 +114,12 @@ def resolve_platform(task):
 
     return "custom"
 
+def get_baseline_value(task):
+    for f in task.get("custom_fields", []):
+        if f["id"] == FIELD_BASELINE:
+            return f.get("value")
+    return None
+
 def update_baseline(task_id, baseline_uuid):
     url = f"https://api.clickup.com/api/v2/task/{task_id}/field/{FIELD_BASELINE}"
     payload = {"value": baseline_uuid}
@@ -142,10 +142,15 @@ def run():
     tasks = get_all_tasks()
     print(f"🔎 Processing {len(tasks)} tasks")
 
-    updated = 0
+    updated = skipped = 0
 
     for task in tasks:
         task_id = task["id"]
+
+        # Skip if baseline already set
+        if get_baseline_value(task) is not None:
+            skipped += 1
+            continue
 
         platform = resolve_platform(task)
         baseline_label = PLATFORM_TO_BASELINE[platform]
@@ -159,7 +164,9 @@ def run():
             updated += 1
             print(f"✅ {task_id} | {platform} → {baseline_label}")
 
-    print(f"\n🎯 Done | Updated {updated} tasks")
+    print("\n" + "=" * 60)
+    print(f"Summary: {updated} updated | {skipped} skipped")
+    print("=" * 60)
 
 if __name__ == "__main__":
     run()
