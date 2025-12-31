@@ -1,6 +1,7 @@
 import json
 import requests
 from datetime import datetime, timedelta, date
+from urllib.parse import unquote
 
 # ---------------- CONFIG LOADERS ---------------- #
 
@@ -53,7 +54,9 @@ class ClickUpClient:
         self.kickoff_field_id = config["kickoff_field_id"]
         self.go_live_field_id = config["go_live_field_id"]
         self.aging_field_id = config["aging_field_id"]
-        self.required_tag = config["required_tag"].lower()
+        #self.required_tag = config["required_tag"].lower()
+        self.required_tag = unquote(config["required_tag"]).lower()
+        print("🔎 Matching tag:", self.required_tag)
 
         self.calculator = WorkingDaysCalculator("config/holidays.json")
 
