@@ -1,0 +1,30 @@
+name: Update ClickUp Baseline by Commerce Platform
+
+on:
+  schedule:
+    # Daily 9am IST
+    - cron: "30 3 * * *"
+
+  workflow_dispatch:
+
+jobs:
+  update-baseline:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+
+      - name: Run baseline updater
+        run: |
+          python baseline_update.py
