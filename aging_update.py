@@ -62,11 +62,12 @@ class ClickUpClient:
 
     def get_tasks(self):
         url = f"{self.BASE_URL}/list/{self.list_id}/task"
-        params = {"include_closed": "true", "subtasks": "true"}
+        params = {"include_closed": "true", "subtasks": "false"}
 
         response = requests.get(url, headers=self.headers, params=params)
         response.raise_for_status()
         return response.json().get("tasks", [])
+        print("tasks", response.json().get("tasks", [])) break
 
     def update_field(self, task_id, value):
         url = f"{self.BASE_URL}/task/{task_id}/field/{self.aging_field_id}"
