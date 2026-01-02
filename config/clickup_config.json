@@ -6,5 +6,11 @@
   "aging_field_id": "04713aad-23e4-4e5b-ae40-05a0c944025a",
   "commerce_platform_field_id": "4927273a-9c1f-4042-8aca-5fd4d14fa26a",
   "baseline_field_id": "cb044877-33f3-4720-8a33-6d7e3d9a6ea5",
-  "required_tag": "%23new"
+  "required_tag": "%23new",
+  "sentiment_field_id": "c9c4fea3-71d7-46f2-a0c4-0c5b403bd227",
+  "actual_aging_field_id": "04713aad-23e4-4e5b-ae40-05a0c944025a",
+  "baseline_field_id": "cb044877-33f3-4720-8a33-6d7e3d9a6ea5",
+  "dry_run": false,
+  "pause_ms_between_updates": 50
+
 }
