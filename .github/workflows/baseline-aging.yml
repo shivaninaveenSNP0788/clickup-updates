@@ -27,4 +27,4 @@ jobs:
 
       - name: Run baseline updater
         run: |
-          python baseline_update.py
+          python baseline-aging.py
