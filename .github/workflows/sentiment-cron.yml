@@ -5,25 +5,18 @@ on:
   schedule:
     # Runs every day at 04:00 UTC (≈ 09:30 IST)
     - cron: "0 4 * * *"
-  workflow_dispatch: {}
-
-permissions:
-  contents: read
+  workflow_dispatch: {}   # allow manual trigger
 
 jobs:
   run-sentiment:
     runs-on: ubuntu-latest
-    timeout-minutes: 15
-    concurrency:
-      group: clickup-sentiment
-      cancel-in-progress: false
 
     steps:
-      - name: Checkout
+      - name: Checkout code
         uses: actions/checkout@v4
 
       - name: Set up Python
-        uses: actions/setup-python@v5
+        uses: actions/setup-python@v4
         with:
           python-version: "3.11"
 
@@ -36,30 +29,6 @@ jobs:
             pip install requests
           fi
 
-      - name: Create runtime config from secrets
-        env:
-          CLICKUP_API_TOKEN: ${{ secrets.CLICKUP_API_TOKEN }}
-          CLICKUP_LIST_ID: ${{ secrets.CLICKUP_LIST_ID }}
-          CLICKUP_SENTIMENT_FIELD_ID: ${{ secrets.CLICKUP_SENTIMENT_FIELD_ID }}
-          CLICKUP_ACTUAL_FIELD_ID: ${{ secrets.CLICKUP_ACTUAL_FIELD_ID }}
-          CLICKUP_BASELINE_FIELD_ID: ${{ secrets.CLICKUP_BASELINE_FIELD_ID }}
-        run: |
-          mkdir -p config
-          cat > config/clickup_config.json << 'JSON'
-          {
-            "api_token": "${CLICKUP_API_TOKEN}",
-            "list_id": "${CLICKUP_LIST_ID}",
-            "sentiment_field_id": "${CLICKUP_SENTIMENT_FIELD_ID}",
-            "actual_aging_field_id": "${CLICKUP_ACTUAL_FIELD_ID}",
-            "baseline_field_id": "${CLICKUP_BASELINE_FIELD_ID}",
-            "required_tag": "%23new",
-            "dry_run": false,
-            "pause_ms_between_updates": 50
-          }
-          JSON
-
-      - name: Run sentiment updater
-        env:
-          PYTHONUNBUFFERED: "1"
+      - name: Run sentiment updater script
         run: |
           python sentiment.py
