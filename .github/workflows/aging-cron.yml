@@ -25,4 +25,4 @@ jobs:
           CLICKUP_LIST_ID: ${{ secrets.CLICKUP_LIST_ID }}
           FIELD_ACTUAL_KICKOFF: ${{ secrets.FIELD_ACTUAL_KICKOFF }}
           FIELD_AGING: ${{ secrets.FIELD_AGING }}
-        run: python aging_update.py
+        run: python actual_aging.py
